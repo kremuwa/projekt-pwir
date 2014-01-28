@@ -1,7 +1,24 @@
 % Moduł liczący. To właśnie ten moduł będzie na węźle.
 
--module(calculator).
--export([computeRows/4, computeRow/5, computeField/2, zeros/1, zeros/2]).
+-module(golLogic).
+-export([nodeStart/1]).
+
+nodeStart(Parent) ->
+	receive
+		{[Head | Tail], From, To} ->
+			%io:format("Prototyp tablicy wynikow:~n~w~n",[zeros2D(length(Head),length([Head | Tail]))]),
+			%io:format("Otrzymalem fragment planszy od ~B do ~B:~n~w~n",[From, To, [Head | Tail]]),
+			Result = computeRows([Head | Tail], zeros2D(length(Head),length([Head | Tail])), 1, length([Head | Tail])),
+			Parent ! {
+						Result,
+						From,
+						To
+					},
+			%io:format("Po obliczeniach, fragment planszy od ~B do ~B wyglad tak:~n~w~n",[From, To, Result]),
+			nodeStart(Parent);
+		exit ->
+			ok
+	end.
 
 % Liczy argument dla kilku wierszy
 %
@@ -101,6 +118,8 @@ end.
 
 % Liczy wynik dla pola
 computeField(Value, Neighbors) ->
+	% io:format("Sasiedzi: ~n~B~n~B~n~B~n~B~n~B~n", [lists:nth(1,Neighbors),lists:nth(2,Neighbors),lists:nth(3,Neighbors),lists:nth(4,Neighbors),lists:nth(5,Neighbors)]),
+	
 if
 	Value == 0 -> case lists:sum(Neighbors) of
 		3 -> 1;
@@ -125,4 +144,13 @@ zeros(List, Number) ->
 if
 	Number == 0 -> List;
 	Number > 0 -> zeros(lists:append(List, [0]), Number-1)
+end.
+
+zeros2D(Number,Count) ->
+	zeros2D([], Number, Count).
+	
+zeros2D(List, Number, Count) ->
+if
+	Count == 0 -> List;
+	Count > 0 -> zeros2D(List ++ [zeros(Number)], Number, Count-1)
 end.

@@ -1,4 +1,4 @@
 projekt-pwir
 ============
 
-Repozytorium do projektu z Programowania Współbieżnego i Rozproszonego
+Game of life in Erlang for a university project
